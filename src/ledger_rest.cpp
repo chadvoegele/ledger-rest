@@ -119,9 +119,21 @@ namespace ledger_rest {
   }
 
   std::list<std::string> ledger_rest::get_accounts() {
+    std::list<std::string> args;
+    return get_balance_accounts(args);
+  }
+
+  std::list<std::string> ledger_rest::get_budget_accounts() {
+    std::list<std::string> args;
+    args.push_back("--budget");
+    return get_balance_accounts(args);
+  }
+
+  std::list<std::string> ledger_rest::get_balance_accounts(std::list<std::string> args) {
     ledger::report_t report(*session_ptr);
     ledger::scope_t::default_scope = &report;
 
+    ledger::process_arguments(args, report);
     report.normalize_options("balance");
 
     ledger::call_scope_t query_args(report);
@@ -178,12 +190,15 @@ namespace ledger_rest {
 
     std::list<std::string> register_request;
     std::list<std::string> accounts_request;
+    std::list<std::string> budget_accounts_request;
     if (http_prefix.size() > 0) {
       register_request = {"", http_prefix, "report", "register"};
       accounts_request = {"", http_prefix, "accounts"};
+      budget_accounts_request = {"", http_prefix, "budget_accounts"};
     } else {
       register_request = {"", "report", "register"};
       accounts_request = {"", "accounts"};
+      budget_accounts_request = {"", "budget_accounts"};
     }
 
     if (uri_parts == register_request) {
@@ -203,6 +218,12 @@ namespace ledger_rest {
       std::list<std::string> accounts(ledger_rest::get_accounts());
 
       http::response res = build_ok(to_json(accounts));
+      return res;
+
+    } else if (uri_parts == budget_accounts_request) {
+      std::list<std::string> budget_accounts(ledger_rest::get_budget_accounts());
+
+      http::response res = build_ok(to_json(budget_accounts));
       return res;
 
     } else
@@ -254,8 +275,10 @@ namespace ledger_rest {
   }
 
   void ledger_rest::account_capturer::operator()(ledger::account_t& account) {
-    std::string account_name = account.partial_name(true);
-    result_capture.push_back(account_name);
+    if (account.has_xdata()) {
+      std::string account_name = account.partial_name(true);
+      result_capture.push_back(account_name);
+    }
   }
 
   void ledger_rest::account_capturer::clear() {

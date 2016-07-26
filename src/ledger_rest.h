@@ -57,6 +57,7 @@ namespace ledger_rest {
       static std::string to_json(std::list<post_result> posts);
 
       std::list<std::string> get_accounts();
+      std::list<std::string> get_budget_accounts();
       static std::string to_json(std::list<std::string> accounts);
 
       virtual http::response respond(http::request request);
@@ -74,6 +75,7 @@ namespace ledger_rest {
       static std::string to_json(std::list<T> x, std::function<std::string(T)>);
       virtual http::response respond_or_throw(http::request request);
       void reset_journal();
+      std::list<std::string> get_balance_accounts(std::list<std::string> args);
 
       class post_capturer : public ledger::item_handler<ledger::post_t> {
         public:

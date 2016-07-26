@@ -112,13 +112,16 @@ TEST(ledger_rest, register2) {
   run_register_test(std::string("ledger1.txt"), args, query, expected);
 }
 
-void run_account_test(const std::string& ledger_file,
+template<typename T>
+void run_generic_account_test(const std::string& ledger_file,
+    T account_function,
     const std::vector<std::string>& expected) {
   black_hole_logger logger;
   simple_args args(RESOURCE_PATH + std::string("/") + ledger_file);
   ledger_rest::ledger_rest lr(args, logger);
 
-  std::list<std::string> actual = lr.get_accounts();
+  auto fn = std::bind(account_function, &lr);
+  std::list<std::string> actual = fn();
 
   ASSERT_EQ(expected.size(), actual.size());
   std::list<std::string>::const_iterator result = actual.cbegin();
@@ -128,17 +131,36 @@ void run_account_test(const std::string& ledger_file,
   }
 }
 
+void run_account_test(const std::string& ledger_file,
+    const std::vector<std::string>& expected) {
+  run_generic_account_test(ledger_file, &ledger_rest::ledger_rest::get_accounts,
+      expected);
+}
+
+void run_budget_account_test(const std::string& ledger_file,
+    const std::vector<std::string>& expected) {
+  run_generic_account_test(ledger_file,
+      &ledger_rest::ledger_rest::get_budget_accounts, expected);
+}
+
 TEST(ledger_rest, account) {
   std::vector<std::string> expected = {
-    std::string("assets"),
     std::string("assets:cash"),
-    std::string("expenses"),
     std::string("expenses:books"),
     std::string("expenses:fun"),
     std::string("expenses:movie"),
   };
 
   run_account_test(std::string("/ledger1.txt"), expected);
+}
+
+TEST(ledger_rest, budget_account) {
+  std::vector<std::string> expected = {
+    std::string("assets:cash"),
+    std::string("expenses:fun")
+  };
+
+  run_budget_account_test(std::string("/ledger1.txt"), expected);
 }
 
 TEST(ledger_rest, respond_fail) {
