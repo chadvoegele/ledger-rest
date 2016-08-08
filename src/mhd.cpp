@@ -84,6 +84,7 @@ namespace budget_charts {
       *d = MHD_start_daemon(MHD_NO_FLAG,
           port, NULL, NULL,
           &answer_callback_no_auth, this,
+          MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
           MHD_OPTION_END);
 
     } else if (client_cert.size() == 0) {
@@ -136,14 +137,15 @@ namespace budget_charts {
     int ret;
 
     if (*con_cls == NULL) {
-      int* call_count = new int;
-      *con_cls = call_count;
-      *call_count = 0;
+      struct con_info* conn = (struct con_info*)malloc(sizeof(struct con_info));
+      conn->response = NULL;
+      conn->call_count = 0;
+      *con_cls = conn;
       return MHD_YES;
 
     } else {
-      int* call_count = static_cast<int*>(*con_cls);
-      *call_count++;
+      struct con_info* conn = (struct con_info*)(*con_cls);
+      conn->call_count = conn->call_count + 1;
 
       const char *page  = "<html><body>Unauthorized</body></html>";
       struct MHD_Response* unauthorized_response =
@@ -157,13 +159,21 @@ namespace budget_charts {
       } else if (mhd_obj->user_pass.size() > 0 && !verify_user_pass(mhd_obj, connection)) {
           ret = MHD_queue_basic_auth_fail_response(connection, "", unauthorized_response);
       } else {
-        http::request request(build_request(connection, url, method));
-        http::response response(mhd_obj->responder.respond(request));
+        if (conn->response == NULL) {
+          http::request request(build_request(connection, url, method, upload_data, *upload_data_size));
+          http::response* response = new http::response(mhd_obj->responder.respond(request));
+          conn->response = response;
+        }
 
-        const char* page = response.body.c_str();
+        if (*upload_data_size != 0) {
+          *upload_data_size = 0;
+          return MHD_YES;
+        }
+
+        const char* page = conn->response->body.c_str();
         struct MHD_Response *mhd_response =
           MHD_create_response_from_buffer(strlen(page), (void*)page, MHD_RESPMEM_MUST_COPY);
-        ret = MHD_queue_response(connection, response.status_code, mhd_response);
+        ret = MHD_queue_response(connection, conn->response->status_code, mhd_response);
         MHD_destroy_response(mhd_response);
 
       }
@@ -182,16 +192,36 @@ namespace budget_charts {
       const char* upload_data,
       size_t* upload_data_size,
       void** con_cls) {
-    mhd* mhd_obj = static_cast<mhd*>(cls);
-    http::request request(build_request(connection, url, method));
-    http::response response(mhd_obj->responder.respond(request));
+    if (*con_cls == NULL) {
+      struct con_info* conn = (struct con_info*)malloc(sizeof(struct con_info));
+      *con_cls = conn;
+      conn->call_count = 0;
+      conn->response = NULL;
+      return MHD_YES;
 
-    const char* page = response.body.c_str();
-    struct MHD_Response *mhd_response =
-      MHD_create_response_from_buffer(strlen(page), (void*)page, MHD_RESPMEM_MUST_COPY);
-    int ret = MHD_queue_response(connection, response.status_code, mhd_response);
-    MHD_destroy_response(mhd_response);
-    return ret;
+    } else {
+      struct con_info* conn = (struct con_info*)(*con_cls);
+      conn->call_count = conn->call_count + 1;
+
+      mhd* mhd_obj = static_cast<mhd*>(cls);
+      if (conn->response == NULL) {
+        http::request request(build_request(connection, url, method, upload_data, *upload_data_size));
+        http::response* response = new http::response(mhd_obj->responder.respond(request));
+        conn->response = response;
+      }
+
+      if (*upload_data_size != 0) {
+        *upload_data_size = 0;
+        return MHD_YES;
+      }
+
+      const char* page = conn->response->body.c_str();
+      struct MHD_Response *mhd_response =
+        MHD_create_response_from_buffer(strlen(page), (void*)page, MHD_RESPMEM_MUST_COPY);
+      int ret = MHD_queue_response(connection, conn->response->status_code, mhd_response);
+      MHD_destroy_response(mhd_response);
+      return ret;
+    }
   }
 
   bool mhd::verify_user_pass(mhd* mhd_obj, struct MHD_Connection* connection) {
@@ -307,9 +337,13 @@ namespace budget_charts {
         struct MHD_Connection *connection,
         void **con_cls,
         enum MHD_RequestTerminationCode toe) {
-    if (con_cls != NULL) {
-      int* call_count = static_cast<int*>(*con_cls);
-      delete call_count;
+    if (*con_cls != NULL) {
+      struct con_info* conn = (struct con_info*)(*con_cls);
+
+      if (conn->response != NULL) {
+        delete conn->response;
+      }
+      free(*con_cls);
     }
   }
 
@@ -355,13 +389,14 @@ namespace budget_charts {
   }
 
   http::request mhd::build_request(struct MHD_Connection* connection,
-      const char* url, const char* method) {
+      const char* url, const char* method, const char* upload_data, size_t upload_size) {
     std::map<std::string, std::string> headers
       = get_headers(connection);
     std::multimap<std::string, std::string> uri_args
       = get_uri_args(connection);
+    std::string upload(upload_data, upload_size);
     http::request request(std::string(method), std::string(url),
-        headers, uri_args);
+        headers, uri_args, upload);
     return request;
   }
 

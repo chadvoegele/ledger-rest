@@ -88,7 +88,7 @@ namespace budget_charts {
           enum MHD_RequestTerminationCode toe);
 
       static http::request build_request(struct MHD_Connection* connection,
-          const char* url, const char* method);
+          const char* url, const char* method, const char* upload_data, size_t upload_size);
       static std::map<std::string, std::string> get_headers(struct MHD_Connection* connection);
       static std::multimap<std::string, std::string> get_uri_args(struct MHD_Connection* connection);
       void start_daemon(struct MHD_Daemon** d);
@@ -104,5 +104,10 @@ namespace budget_charts {
       template<typename K, typename T>
         static std::map<K, T> convert_map(std::multimap<K, T> mmap);
       std::string get_password();
+  };
+
+  struct con_info {
+    int call_count;
+    http::response* response;
   };
 }

@@ -60,6 +60,8 @@ namespace ledger_rest {
       std::list<std::string> get_budget_accounts();
       static std::string to_json(std::list<std::string> accounts);
 
+      static std::string to_json(std::list<std::list<post_result>> results);
+
       virtual http::response respond(http::request request);
 
       const std::string ledger_file;
@@ -72,8 +74,11 @@ namespace ledger_rest {
       std::string http_prefix;
 
       template<typename T>
-      static std::string to_json(std::list<T> x, std::function<std::string(T)>);
+      static std::string to_string(const std::list<T>&);
+      template<typename T>
+      static std::string to_json(std::list<T>, std::function<std::string(T)>);
       virtual http::response respond_or_throw(http::request request);
+      std::list<post_result> run_register_or_throw(std::list<std::string>, std::list<std::string>);
       void reset_journal();
       std::list<std::string> get_balance_accounts(std::list<std::string> args);
 

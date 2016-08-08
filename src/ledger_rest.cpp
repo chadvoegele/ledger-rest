@@ -31,6 +31,7 @@
 
 #include "ledger_rest.h"
 #include "uri_parser.h"
+#include "json_parser.h"
 
 namespace ledger_rest {
   typedef ledger_rest::post_result post_result;
@@ -40,7 +41,45 @@ namespace ledger_rest {
       reset_journal();
   }
 
+  template<typename T>
+  std::string ledger_rest::to_string(const std::list<T>& v) {
+    std::stringstream s;
+    s << '[';
+    bool first = true;
+    for (const auto& e : v) {
+      if (first) {
+        s << e;
+        first = false;
+
+      } else {
+        s << ',' << e;
+      }
+    }
+    s << ']';
+    return s.str();
+  }
+
   std::list<post_result> ledger_rest::run_register(
+      std::list<std::string> args, std::list<std::string> query) {
+    try {
+      return run_register_or_throw(args, query);
+
+    } catch (const std::exception& e) {
+      lr_logger.log(5, e.what());
+      lr_logger.log(5, to_string(args));
+      lr_logger.log(5, to_string(query));
+
+    } catch (...) {
+      lr_logger.log(5, "Unkown error while respond to request:");
+      lr_logger.log(5, to_string(args));
+      lr_logger.log(5, to_string(query));
+    }
+
+    std::list<post_result> empty;
+    return empty;
+  }
+
+  std::list<post_result> ledger_rest::run_register_or_throw(
       std::list<std::string> args, std::list<std::string> query) {
     ledger::report_t report(*session_ptr);
     ledger::scope_t::default_scope = &report;
@@ -118,6 +157,18 @@ namespace ledger_rest {
     return json;
   }
 
+  std::string ledger_rest::to_json(std::list<std::list<post_result>> results) {
+    std::list<std::string> intermediate_json;
+    for (auto iter = results.cbegin(); iter != results.cend(); iter++) {
+      intermediate_json.push_back(to_json(*iter));
+    }
+    std::function<std::string(std::string)> to_json_fn
+      = [](std::string s) { return s; };
+
+    std::string json(to_json(intermediate_json, to_json_fn));
+    return json;
+  }
+
   std::list<std::string> ledger_rest::get_accounts() {
     std::list<std::string> args;
     return get_balance_accounts(args);
@@ -180,8 +231,10 @@ namespace ledger_rest {
       return res;
     };
 
-    if (request.method != std::string("GET"))
+    if (request.method != std::string("GET") &&
+        request.method != std::string("POST")) {
       return build_fail(http::status_code::METHOD_NOT_ALLOWED);
+    }
 
     std::list<std::string> uri_parts
       = budget_charts::split_string(request.url, "/");
@@ -202,25 +255,51 @@ namespace ledger_rest {
     }
 
     if (uri_parts == register_request) {
-      if (uri_args.find("args") != uri_args.end()
-          && uri_args.find("query") != uri_args.end()) {
-        std::list<std::string> args = uri_args[std::string("args")];
-        std::list<std::string> query = uri_args[std::string("query")];
-        std::list<post_result> reg(ledger_rest::run_register(args, query));
+      if (request.method == std::string("GET")) {
+        if (uri_args.find("args") != uri_args.end()
+            && uri_args.find("query") != uri_args.end()) {
+          std::list<std::string> args = uri_args[std::string("args")];
+          std::list<std::string> query = uri_args[std::string("query")];
+          std::list<post_result> reg(ledger_rest::run_register(args, query));
 
-        http::response res = build_ok(to_json(reg));
+          http::response res = build_ok(to_json(reg));
+          return res;
+
+        } else {
+          return build_fail(http::status_code::BAD_REQUEST);
+        }
+
+      } else if (request.method == std::string("POST")) {
+        std::list<std::unordered_map<std::string, std::list<std::string>>> parsed_json =
+          budget_charts::parse_register_request_json(request.upload_data);
+
+        std::list<std::list<post_result>> results;
+        for (auto iter = parsed_json.cbegin(); iter != parsed_json.end(); iter++) {
+          std::unordered_map<std::string, std::list<std::string>> req = *iter;
+          std::list<std::string> args = req[std::string("args")];
+          std::list<std::string> query = req[std::string("query")];
+          std::list<post_result> reg(ledger_rest::run_register(args, query));
+          results.push_back(reg);
+        }
+        std::string responses_json = to_json(results);
+
+        http::response res = build_ok(responses_json);
         return res;
 
-      } else
-        return build_fail(http::status_code::BAD_REQUEST);
+      } else {
+        return build_fail(http::status_code::METHOD_NOT_ALLOWED);
 
-    } else if (uri_parts == accounts_request) {
+      }
+
+    } else if (request.method == std::string("GET") &&
+        uri_parts == accounts_request) {
       std::list<std::string> accounts(ledger_rest::get_accounts());
 
       http::response res = build_ok(to_json(accounts));
       return res;
 
-    } else if (uri_parts == budget_accounts_request) {
+    } else if (request.method == std::string("GET") &&
+        uri_parts == budget_accounts_request) {
       std::list<std::string> budget_accounts(ledger_rest::get_budget_accounts());
 
       http::response res = build_ok(to_json(budget_accounts));

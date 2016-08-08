@@ -48,14 +48,16 @@ namespace http {
       const std::string url;
       const std::map<std::string, std::string> headers;
       const std::multimap<std::string, std::string> uri_args;
+      const std::string upload_data;
 
       request(std::string method,
           std::string url,
           std::map<std::string, std::string> headers,
-          std::multimap<std::string, std::string> uri_args)
-          : method(method), url(url), headers(headers), uri_args(uri_args) { }
+          std::multimap<std::string, std::string> uri_args,
+          std::string upload_data = "")
+          : method(method), url(url), headers(headers), uri_args(uri_args), upload_data(upload_data) { }
       request(const request& other) : method(other.method), url(other.url),
-        headers(other.headers), uri_args(other.uri_args) { }
+        headers(other.headers), uri_args(other.uri_args), upload_data(other.upload_data) { }
       request& operator=(const request& other) = delete;
       ~request() = default;
 

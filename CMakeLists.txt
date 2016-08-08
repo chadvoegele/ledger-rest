@@ -9,7 +9,7 @@ set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(TEST_DIR "${PROJECT_SOURCE_DIR}/test")
 set(RES_DIR "${PROJECT_SOURCE_DIR}/res")
 
-include(cmake/set_cpp11.cmake)
+include(cmake/set_cpp14.cmake)
 
 add_subdirectory(${SRC_DIR})
 add_subdirectory(${TEST_DIR})

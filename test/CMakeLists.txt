@@ -18,8 +18,8 @@ configure_file(definitions.cpp.in definitions.cpp)
 include_directories(${SRC_DIR} ${TEST_DIR} ${GTEST_INCLUDE} ${CURL_INCLUDE})
 add_executable(${PROJECT_TEST_NAME} test.cpp ledger_rest_tests.cpp
   uri_parser_tests.cpp mhd_tests.cpp file_reader_tests.cpp definitions.cpp
-  black_hole_logger.cpp)
+  black_hole_logger.cpp json_parser_tests.cpp)
 target_link_libraries(${PROJECT_TEST_NAME} ${PROJECT_NAME}
   ${GTEST_LIB} ${Boost_LIBRARIES} ${MICROHTTPD_LIB} ${CURL_LIB}
   ${CMAKE_THREAD_LIBS_INIT})
-set_cpp11(${PROJECT_TEST_NAME})
+set_cpp14(${PROJECT_TEST_NAME})
