@@ -211,3 +211,17 @@ TEST(ledger_rest, accounts_to_json) {
   std::string expected("[\"grass\", \"is\", \"always\", \"greener\"]");
   ASSERT_EQ(expected, json);
 }
+
+TEST(ledger_rest, get_journal_include_files) {
+  black_hole_logger logger;
+  std::string ledger_file("ledger_inc.txt");
+  simple_args args(RESOURCE_PATH + std::string("/") + ledger_file);
+  ledger_rest::ledger_rest lr(args, logger);
+  auto actual = lr.get_journal_include_files();
+
+  std::list<std::string> expected = {
+    RESOURCE_PATH + std::string("/") + std::string("ledger1.txt")
+  };
+
+  ASSERT_EQ(expected, actual);
+}

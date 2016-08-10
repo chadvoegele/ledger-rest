@@ -66,6 +66,8 @@ namespace ledger_rest {
 
       const std::string ledger_file;
 
+      std::list<std::string> get_journal_include_files();
+
     protected:
       logger& lr_logger;
       std::shared_ptr<ledger::session_t> session_ptr;

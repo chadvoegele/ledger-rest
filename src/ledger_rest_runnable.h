@@ -27,6 +27,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <list>
 
 #include "ledger_rest_args.h"
 #include "ledger_rest.h"
@@ -51,7 +52,7 @@ namespace budget_charts {
       virtual unsigned long long get_select_timeout();
 
     private:
-      int update_fd, update_wd;
-      void set_update_fd();
+      std::list<int> update_fds;
+      void set_update_fds();
   };
 }

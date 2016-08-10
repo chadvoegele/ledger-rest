@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <stdexcept>
+#include <fstream>
 
 #include "ledger_rest.h"
 #include "uri_parser.h"
@@ -317,11 +318,37 @@ namespace ledger_rest {
       ledger::scope_t::empty_scope = &empty_scope;
       session_ptr->read_journal(ledger_file);
       is_file_loaded = true;
+      lr_logger.log(7, "Reloaded ledger file.");
 
     } catch (...) {
       lr_logger.log(5, "Unable to load ledger file");
       is_file_loaded = false;
     }
+  }
+
+  std::list<std::string> ledger_rest::get_journal_include_files() {
+    std::string include_directive("!include ");
+    std::ifstream ledger_stream(ledger_file, std::ios::in);
+
+    std::list<std::string> include_files;
+    std::string line;
+    if (ledger_stream.is_open()) {
+      while (getline(ledger_stream, line)) {
+        if (line.find(include_directive) == 0) {
+          std::string include_file = line.substr(include_directive.length());
+          auto last_slash = ledger_file.find_last_of('/');
+
+          // Assume POSIX for absolute path check
+          if (include_file.at(0) != '/' && last_slash != std::string::npos) {
+            include_files.push_back(ledger_file.substr(0, 1+last_slash) + include_file);
+          } else {
+            include_files.push_back(include_file);
+          }
+        }
+      }
+    }
+
+    return include_files;
   }
 
   ledger::value_t ledger_rest::post_capturer::get_amount(ledger::post_t& post)

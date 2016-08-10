@@ -36,7 +36,7 @@ namespace budget_charts {
   ledger_rest_runnable::ledger_rest_runnable(::ledger_rest::ledger_rest_args& args,
       ::ledger_rest::logger& logger)
     : ::ledger_rest::ledger_rest(args, logger) {
-      set_update_fd();
+      set_update_fds();
   }
 
   http::response ledger_rest_runnable::respond(http::request request) {
@@ -45,31 +45,54 @@ namespace budget_charts {
 
   void ledger_rest_runnable::run_from_select(const fd_set* read_fd_set,
       const fd_set* write_fd_set, const fd_set* except_fd_set) {
-    if (FD_ISSET(update_fd, read_fd_set)) {
+    bool someFDIsSet = false;
+    for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
+      if (FD_ISSET(*iter, read_fd_set)) {
+        someFDIsSet = true;
+        break;
+      }
+    }
+
+    if (someFDIsSet) {
       ::ledger_rest::ledger_rest::reset_journal();
-      close(update_fd);
-      set_update_fd();
+      for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
+        close(*iter);
+      }
+      set_update_fds();
     }
   }
 
   int ledger_rest_runnable::set_fdsets(fd_set* read_fd_set,
       fd_set* write_fd_set, fd_set* except_fd_set) {
-    if (update_fd != -1) {
-      FD_SET(update_fd, read_fd_set);
+    int max_fd = -1;
+    if (update_fds.size() != 0) {
+      for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
+        FD_SET(*iter, read_fd_set);
+        if (*iter > max_fd) {
+          max_fd = *iter;
+        }
+      }
     }
-    return update_fd;
+    return max_fd;
   }
 
   unsigned long long ledger_rest_runnable::get_select_timeout() {
     return 1000LL * 60LL * 60LL;
   }
 
-  void ledger_rest_runnable::set_update_fd() {
-    update_fd = inotify_init();
-    if (update_fd != -1) {
-      update_wd = inotify_add_watch(update_fd, ledger_file.c_str(), IN_MODIFY);
-    } else {
-      lr_logger.log(5, "Could not create ledger file update fd.");
+  void ledger_rest_runnable::set_update_fds() {
+    auto watch_files = get_journal_include_files();
+    watch_files.push_back(ledger_file);
+
+    update_fds.clear();
+    for (auto iter = watch_files.cbegin(); iter != watch_files.cend(); iter++) {
+      int update_fd = inotify_init();
+      if (update_fd != -1) {
+        inotify_add_watch(update_fd, iter->c_str(), IN_MODIFY);
+        update_fds.push_back(update_fd);
+      } else {
+        lr_logger.log(5, "Could not create ledger file update fd.");
+      }
     }
   }
 }
