@@ -39,7 +39,6 @@ namespace ledger_rest {
 
   ledger_rest::ledger_rest(ledger_rest_args& args, logger& logger)
     : ledger_file(args.get_ledger_file_path()), lr_logger(logger), is_file_loaded(false), http_prefix(args.get_ledger_rest_prefix()) {
-      reset_journal();
   }
 
   template<typename T>
@@ -71,7 +70,7 @@ namespace ledger_rest {
       lr_logger.log(5, to_string(query));
 
     } catch (...) {
-      lr_logger.log(5, "Unkown error while respond to request:");
+      lr_logger.log(5, "Unknown error while respond to request:");
       lr_logger.log(5, to_string(args));
       lr_logger.log(5, to_string(query));
     }
@@ -203,6 +202,14 @@ namespace ledger_rest {
     http::response bad_response(http::status_code::BAD_REQUEST, std::string(""),
         std::map<std::string, std::string>());
 
+    // Don't reload eagerly because:
+    // 1) If journal edits are made rapidly, reloads will be excessive
+    // 2) Dropbox sync inotify events are hard to follow
+    // This does introduce some latency on first HTTP request.
+    if (!is_file_loaded) {
+      reset_journal();
+    }
+
     if (is_file_loaded) {
       try {
         return respond_or_throw(request);
@@ -212,7 +219,7 @@ namespace ledger_rest {
         lr_logger.log(5, request.to_string());
 
       } catch (...) {
-        lr_logger.log(5, "Unkown error while respond to request:");
+        lr_logger.log(5, "Unknown error while respond to request:");
         lr_logger.log(5, request.to_string());
       }
     }
@@ -318,12 +325,21 @@ namespace ledger_rest {
       ledger::scope_t::empty_scope = &empty_scope;
       session_ptr->read_journal(ledger_file);
       is_file_loaded = true;
+      for (auto callback : reload_callbacks) {
+        callback();
+      }
+      reload_callbacks.clear();
       lr_logger.log(7, "Reloaded ledger file.");
 
     } catch (...) {
       lr_logger.log(5, "Unable to load ledger file");
       is_file_loaded = false;
     }
+  }
+
+  void ledger_rest::lazy_reload_journal(std::function<void()> callback) {
+    reload_callbacks.push_back(callback);
+    is_file_loaded = false;
   }
 
   std::list<std::string> ledger_rest::get_journal_include_files() {

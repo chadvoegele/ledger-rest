@@ -36,7 +36,9 @@ namespace budget_charts {
   ledger_rest_runnable::ledger_rest_runnable(::ledger_rest::ledger_rest_args& args,
       ::ledger_rest::logger& logger)
     : ::ledger_rest::ledger_rest(args, logger) {
-      set_update_fds();
+      ::ledger_rest::ledger_rest::lazy_reload_journal(
+          [this] () { this->set_update_fds(); }
+          );
   }
 
   http::response ledger_rest_runnable::respond(http::request request) {
@@ -54,11 +56,15 @@ namespace budget_charts {
     }
 
     if (someFDIsSet) {
-      ::ledger_rest::ledger_rest::reset_journal();
+      // Do not trigger inotify on lazy reload.
+      update_fds.clear();
+      // Reset inotify after lazy reload.
+      ::ledger_rest::ledger_rest::lazy_reload_journal(
+          [this] () { this->set_update_fds(); }
+          );
       for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
         close(*iter);
       }
-      set_update_fds();
     }
   }
 
@@ -88,7 +94,7 @@ namespace budget_charts {
     for (auto iter = watch_files.cbegin(); iter != watch_files.cend(); iter++) {
       int update_fd = inotify_init();
       if (update_fd != -1) {
-        inotify_add_watch(update_fd, iter->c_str(), IN_MODIFY);
+        inotify_add_watch(update_fd, iter->c_str(), IN_MODIFY|IN_MOVED_TO|IN_CLOSE);
         update_fds.push_back(update_fd);
       } else {
         lr_logger.log(5, "Could not create ledger file update fd.");

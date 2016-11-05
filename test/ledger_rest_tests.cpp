@@ -79,6 +79,12 @@ void run_register_test(const std::string& ledger_file, const std::list<std::stri
   simple_args lr_args(RESOURCE_PATH + std::string("/") + ledger_file);
   ledger_rest::ledger_rest lr(lr_args, logger);
 
+  // Need to force the journal to load.
+  http::request req(std::string("HEAD"), std::string("/a"),
+      std::map<std::string, std::string>(),
+      std::multimap<std::string, std::string>());
+  http::response res(lr.respond(req));
+
   std::list<post_result> actual = lr.run_register(args, query);
   compare_post_results(actual, expected);
 }
@@ -119,6 +125,12 @@ void run_generic_account_test(const std::string& ledger_file,
   black_hole_logger logger;
   simple_args args(RESOURCE_PATH + std::string("/") + ledger_file);
   ledger_rest::ledger_rest lr(args, logger);
+
+  // Need to force the journal to load.
+  http::request req(std::string("HEAD"), std::string("/a"),
+      std::map<std::string, std::string>(),
+      std::multimap<std::string, std::string>());
+  http::response res(lr.respond(req));
 
   auto fn = std::bind(account_function, &lr);
   std::list<std::string> actual = fn();
