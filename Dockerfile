@@ -18,9 +18,12 @@ RUN \
       cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_DEBUG=0 . && \
       make -j$(nproc) install
 WORKDIR /tmp/ledger-rest_build
+COPY CMakeLists.txt /tmp/ledger-rest_build/
+COPY cmake/ /tmp/ledger-rest_build/cmake
+COPY src/ /tmp/ledger-rest_build/src
+COPY test/ /tmp/ledger-rest_build/test
+COPY res/ /tmp/ledger-rest_build/res
 RUN \
-      git clone https://github.com/chadvoegele/ledger-rest.git && \
-      cd ledger-rest && \
       cmake -DCMAKE_INSTALL_PREFIX=/usr . && \
       make -j$(nproc) install
 WORKDIR /
