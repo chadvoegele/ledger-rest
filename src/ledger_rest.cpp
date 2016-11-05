@@ -319,17 +319,7 @@ namespace ledger_rest {
 
   void ledger_rest::reset_journal() {
     try {
-      session_ptr = std::make_shared<ledger::session_t>();
-      ledger::set_session_context(session_ptr.get());
-      ledger::scope_t::default_scope = &empty_scope;
-      ledger::scope_t::empty_scope = &empty_scope;
-      session_ptr->read_journal(ledger_file);
-      is_file_loaded = true;
-      for (auto callback : reload_callbacks) {
-        callback();
-      }
-      reload_callbacks.clear();
-      lr_logger.log(7, "Reloaded ledger file.");
+      reset_journal_or_throw();
 
     } catch (...) {
       lr_logger.log(5, "Unable to load ledger file");
@@ -337,8 +327,17 @@ namespace ledger_rest {
     }
   }
 
-  void ledger_rest::lazy_reload_journal(std::function<void()> callback) {
-    reload_callbacks.push_back(callback);
+  void ledger_rest::reset_journal_or_throw() {
+    session_ptr = std::make_shared<ledger::session_t>();
+    ledger::set_session_context(session_ptr.get());
+    ledger::scope_t::default_scope = &empty_scope;
+    ledger::scope_t::empty_scope = &empty_scope;
+    session_ptr->read_journal(ledger_file);
+    is_file_loaded = true;
+    lr_logger.log(7, "Reloaded ledger file.");
+  }
+
+  void ledger_rest::lazy_reload_journal() {
     is_file_loaded = false;
   }
 

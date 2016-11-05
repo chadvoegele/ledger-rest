@@ -46,6 +46,7 @@ namespace budget_charts {
       virtual ~ledger_rest_runnable() { }
 
       virtual http::response respond(http::request request);
+      virtual void reset_journal_or_throw();
       virtual void run_from_select(const fd_set* read_fd_set, const fd_set* write_fd_set,
           const fd_set* except_fd_set);
       virtual int set_fdsets(fd_set* read_fd_set, fd_set* write_fd_set, fd_set* except_fd_set);

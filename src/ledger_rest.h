@@ -67,7 +67,7 @@ namespace ledger_rest {
       const std::string ledger_file;
 
       std::list<std::string> get_journal_include_files();
-      void lazy_reload_journal(std::function<void()> callback = [](){});
+      void lazy_reload_journal();
 
     protected:
       logger& lr_logger;
@@ -75,7 +75,6 @@ namespace ledger_rest {
       ledger::empty_scope_t empty_scope;
       bool is_file_loaded;
       std::string http_prefix;
-      std::vector<std::function<void()>> reload_callbacks;
 
       template<typename T>
       static std::string to_string(const std::list<T>&);
@@ -84,6 +83,7 @@ namespace ledger_rest {
       virtual http::response respond_or_throw(http::request request);
       std::list<post_result> run_register_or_throw(std::list<std::string>, std::list<std::string>);
       void reset_journal();
+      virtual void reset_journal_or_throw();
       std::list<std::string> get_balance_accounts(std::list<std::string> args);
 
       class post_capturer : public ledger::item_handler<ledger::post_t> {

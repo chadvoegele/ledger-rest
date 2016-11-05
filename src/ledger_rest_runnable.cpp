@@ -37,13 +37,16 @@ namespace budget_charts {
       ::ledger_rest::ledger_rest_args& args,
       ::ledger_rest::logger& logger
       ) : ::ledger_rest::ledger_rest(args, logger), update_fd(-1) {
-      ::ledger_rest::ledger_rest::lazy_reload_journal(
-          [this] () { this->set_update_fd(); }
-          );
+      ::ledger_rest::ledger_rest::lazy_reload_journal();
   }
 
   http::response ledger_rest_runnable::respond(http::request request) {
     return ::ledger_rest::ledger_rest::respond(request);
+  }
+
+  void ledger_rest_runnable::reset_journal_or_throw() {
+    ::ledger_rest::ledger_rest::reset_journal_or_throw();
+    set_update_fd();
   }
 
   void ledger_rest_runnable::run_from_select(const fd_set* read_fd_set,
@@ -51,10 +54,7 @@ namespace budget_charts {
     if (FD_ISSET(update_fd, read_fd_set)) {
       // Do not trigger inotify on lazy reload.
       unset_update_fd();
-      // Reset inotify after lazy reload.
-      ::ledger_rest::ledger_rest::lazy_reload_journal(
-          [this] () { this->set_update_fd(); }
-          );
+      ::ledger_rest::ledger_rest::lazy_reload_journal();
     }
   }
 
