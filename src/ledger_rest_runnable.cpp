@@ -33,11 +33,12 @@
 #include "ledger_rest_runnable.h"
 
 namespace budget_charts {
-  ledger_rest_runnable::ledger_rest_runnable(::ledger_rest::ledger_rest_args& args,
-      ::ledger_rest::logger& logger)
-    : ::ledger_rest::ledger_rest(args, logger) {
+  ledger_rest_runnable::ledger_rest_runnable(
+      ::ledger_rest::ledger_rest_args& args,
+      ::ledger_rest::logger& logger
+      ) : ::ledger_rest::ledger_rest(args, logger), update_fd(-1) {
       ::ledger_rest::ledger_rest::lazy_reload_journal(
-          [this] () { this->set_update_fds(); }
+          [this] () { this->set_update_fd(); }
           );
   }
 
@@ -47,58 +48,59 @@ namespace budget_charts {
 
   void ledger_rest_runnable::run_from_select(const fd_set* read_fd_set,
       const fd_set* write_fd_set, const fd_set* except_fd_set) {
-    bool someFDIsSet = false;
-    for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
-      if (FD_ISSET(*iter, read_fd_set)) {
-        someFDIsSet = true;
-        break;
-      }
-    }
-
-    if (someFDIsSet) {
+    if (FD_ISSET(update_fd, read_fd_set)) {
       // Do not trigger inotify on lazy reload.
-      update_fds.clear();
+      unset_update_fd();
       // Reset inotify after lazy reload.
       ::ledger_rest::ledger_rest::lazy_reload_journal(
-          [this] () { this->set_update_fds(); }
+          [this] () { this->set_update_fd(); }
           );
-      for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
-        close(*iter);
-      }
     }
   }
 
   int ledger_rest_runnable::set_fdsets(fd_set* read_fd_set,
       fd_set* write_fd_set, fd_set* except_fd_set) {
-    int max_fd = -1;
-    if (update_fds.size() != 0) {
-      for (auto iter = update_fds.cbegin(); iter != update_fds.cend(); iter++) {
-        FD_SET(*iter, read_fd_set);
-        if (*iter > max_fd) {
-          max_fd = *iter;
-        }
-      }
+    if (update_fd != -1) {
+      FD_SET(update_fd, read_fd_set);
     }
-    return max_fd;
+    return update_fd;
   }
 
   unsigned long long ledger_rest_runnable::get_select_timeout() {
     return 1000LL * 60LL * 60LL;
   }
 
-  void ledger_rest_runnable::set_update_fds() {
+  void ledger_rest_runnable::set_update_fd() {
+    update_wds.clear();
+    update_fd = -1;
+
     auto watch_files = get_journal_include_files();
     watch_files.push_back(ledger_file);
 
-    update_fds.clear();
+    update_fd = inotify_init();
+    if (update_fd == -1) {
+      lr_logger.log(5, "Could not create ledger file update fd.");
+      return;
+    }
+
     for (auto iter = watch_files.cbegin(); iter != watch_files.cend(); iter++) {
-      int update_fd = inotify_init();
-      if (update_fd != -1) {
-        inotify_add_watch(update_fd, iter->c_str(), IN_MODIFY|IN_MOVED_TO|IN_CLOSE);
-        update_fds.push_back(update_fd);
+      int update_wd = inotify_add_watch(update_fd, iter->c_str(), IN_MODIFY|IN_MOVED_TO|IN_CLOSE);
+      if (update_wd == -1) {
+        lr_logger.log(5, "Could not create ledger file watch fd.");
       } else {
-        lr_logger.log(5, "Could not create ledger file update fd.");
+        update_wds.push_back(update_wd);
       }
+    }
+  }
+
+  void ledger_rest_runnable::unset_update_fd() {
+    if (update_fd != -1) {
+      for (auto iter = update_wds.cbegin(); iter != update_wds.cend(); iter++) {
+        inotify_rm_watch(update_fd, *iter);
+      }
+      close(update_fd);
+      update_wds.clear();
+      update_fd = -1;
     }
   }
 }

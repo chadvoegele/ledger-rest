@@ -52,7 +52,9 @@ namespace budget_charts {
       virtual unsigned long long get_select_timeout();
 
     private:
-      std::list<int> update_fds;
-      void set_update_fds();
+      std::list<int> update_wds;
+      int update_fd;
+      void set_update_fd();
+      void unset_update_fd();
   };
 }
