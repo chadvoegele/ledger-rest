@@ -118,6 +118,20 @@ TEST(ledger_rest, register2) {
   run_register_test(std::string("ledger1.txt"), args, query, expected);
 }
 
+TEST(ledger_rest, register3) {
+  std::list<std::string> args = { "--market", "--empty", "--collapse",
+    "--period", "monthly from 2015/05/01 to 2015/09/01" };
+  std::list<std::string> query = { "assets" };
+
+  std::vector<post_result> expected = {
+    build_result(30, std::string("2015/5/01"), std::string("assets")),
+    build_result(-10, std::string("2015/6/01"), std::string("assets:cash")),
+    build_result(-15, std::string("2015/7/01"), std::string("assets:cash"))
+  };
+
+  run_register_test(std::string("ledger2.txt"), args, query, expected);
+}
+
 template<typename T>
 void run_generic_account_test(const std::string& ledger_file,
     T account_function,

@@ -1,0 +1,16 @@
+~Monthly
+  assets:cash
+  expenses:fun   $200
+
+2015/05/15 me
+  income        -$30
+  assets         $29
+  assets           1 GOLD @@ $1
+
+2015/06/15 payee
+  assets:cash   -$10
+  expenses:fun   $10
+
+2015/07/16 movie
+  assets:cash   -$15
+  expenses:fun   $15

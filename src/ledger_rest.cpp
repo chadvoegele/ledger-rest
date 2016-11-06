@@ -368,11 +368,18 @@ namespace ledger_rest {
 
   ledger::value_t ledger_rest::post_capturer::get_amount(ledger::post_t& post)
   {
-    if (post.amount.is_null()) {
-      return 0L;
+    if (post.has_xdata() && post.xdata().has_flags(POST_EXT_COMPOUND)) {
+      auto value = post.xdata().compound_value;
 
-    } else if (post.has_xdata() && post.xdata().has_flags(POST_EXT_COMPOUND)) {
-      return post.xdata().compound_value;
+      if (value.value()) {
+        return value.value();
+
+      } else {
+        return value;
+      }
+
+    } else if (post.amount.is_null()) {
+      return 0L;
 
     } else {
       return post.amount;
