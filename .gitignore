@@ -1,0 +1,14 @@
+/CMakeCache.txt
+/CMakeFiles/
+/Makefile
+/cmake_install.cmake
+/src/CMakeFiles/
+/src/Makefile
+/src/cmake_install.cmake
+/src/ledger-rest
+/src/libledger-rest.a
+/test/CMakeFiles/
+/test/Makefile
+/test/cmake_install.cmake
+/test/definitions.cpp
+/test/ledger-rest_tests
