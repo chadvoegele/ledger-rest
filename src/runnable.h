@@ -28,7 +28,7 @@
 
 #include <sys/select.h>
 
-namespace budget_charts {
+namespace ledger_rest {
   class runnable {
     public:
       virtual void run_from_select(const fd_set* read_fd_set, const fd_set* write_fd_set,

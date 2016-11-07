@@ -30,7 +30,7 @@
 #include "json_parser.h"
 
 void run_trim_whitespace_test(std::string input, std::string expected) {
-  std::string actual = budget_charts::trim_whitespace(input);
+  std::string actual = ledger_rest::trim_whitespace(input);
   ASSERT_EQ(actual, expected);
 }
 
@@ -56,7 +56,7 @@ void run_parse_register_request_json_test(
     std::string input,
     std::list<std::unordered_map<std::string, std::list<std::string>>> expected) {
   std::list<std::unordered_map<std::string, std::list<std::string>>> actual
-    = budget_charts::parse_register_request_json(input);
+    = ledger_rest::parse_register_request_json(input);
   ASSERT_EQ(actual, expected);
 }
 

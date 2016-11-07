@@ -31,7 +31,7 @@
 #include "logger.h"
 #include "runnable.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   class runner {
     public:
       runner(ledger_rest::logger& logger, std::list<runnable*> runners)

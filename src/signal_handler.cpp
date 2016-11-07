@@ -27,10 +27,10 @@
 
 #include "signal_handler.h"
 
-namespace budget_charts {
-  ::budget_charts::runner* global_runner;
+namespace ledger_rest {
+  ::ledger_rest::runner* global_runner;
 
-  void set_runner(::budget_charts::runner* r) {
+  void set_runner(::ledger_rest::runner* r) {
     global_runner = r;
   }
 

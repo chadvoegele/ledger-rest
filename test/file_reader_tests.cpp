@@ -33,7 +33,7 @@
 void run_file_read_test(std::string input,
      std::string expected) {
   std::string path(RESOURCE_PATH + std::string("/") + input);
-  std::string file_contents(budget_charts::read_whole_file(path));
+  std::string file_contents(ledger_rest::read_whole_file(path));
   ASSERT_EQ(expected, file_contents);
 }
 

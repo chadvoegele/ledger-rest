@@ -31,7 +31,7 @@
 #include <unordered_map>
 #include <map>
 
-namespace budget_charts {
+namespace ledger_rest {
   std::unordered_map<std::string, std::list<std::string>> mapify_uri_args(
       std::multimap<std::string, std::string> uri_args);
 

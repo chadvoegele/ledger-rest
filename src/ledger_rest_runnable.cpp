@@ -32,7 +32,7 @@
 
 #include "ledger_rest_runnable.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   ledger_rest_runnable::ledger_rest_runnable(
       ::ledger_rest::ledger_rest_args& args,
       ::ledger_rest::logger& logger

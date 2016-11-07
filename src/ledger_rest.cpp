@@ -245,9 +245,9 @@ namespace ledger_rest {
     }
 
     std::list<std::string> uri_parts
-      = budget_charts::split_string(request.url, "/");
+      = ::ledger_rest::split_string(request.url, "/");
     std::unordered_map<std::string, std::list<std::string>> uri_args
-      = budget_charts::mapify_uri_args(request.uri_args);
+      = ::ledger_rest::mapify_uri_args(request.uri_args);
 
     std::list<std::string> register_request;
     std::list<std::string> accounts_request;
@@ -279,7 +279,7 @@ namespace ledger_rest {
 
       } else if (request.method == std::string("POST")) {
         std::list<std::unordered_map<std::string, std::list<std::string>>> parsed_json =
-          budget_charts::parse_register_request_json(request.upload_data);
+          ::ledger_rest::parse_register_request_json(request.upload_data);
 
         std::list<std::list<post_result>> results;
         for (auto iter = parsed_json.cbegin(); iter != parsed_json.end(); iter++) {

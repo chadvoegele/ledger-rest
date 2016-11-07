@@ -38,10 +38,10 @@
 #include "http.h"
 #include "responder.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   class mhd : public runnable {
     public:
-      mhd(mhd_args& args, ::ledger_rest::logger& logger, budget_charts::responder& responder);
+      mhd(mhd_args& args, ::ledger_rest::logger& logger, ledger_rest::responder& responder);
       mhd(const mhd&) = delete;
       mhd& operator=(const mhd&) = delete;
       mhd (mhd&&) = delete;
@@ -61,7 +61,7 @@ namespace budget_charts {
 
     private:
       ::ledger_rest::logger& logger;
-      budget_charts::responder& responder;
+      ledger_rest::responder& responder;
       struct MHD_Daemon* daemon;
 
       static int answer_callback_auth(void *cls,

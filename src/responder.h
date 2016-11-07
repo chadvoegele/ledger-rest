@@ -30,7 +30,7 @@
 
 #include "http.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   class responder {
     public:
       virtual http::response respond(http::request request) = 0;

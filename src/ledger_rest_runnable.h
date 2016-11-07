@@ -35,7 +35,7 @@
 #include "runnable.h"
 #include "responder.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   class ledger_rest_runnable : public ::ledger_rest::ledger_rest, public runnable, public responder {
     public:
       ledger_rest_runnable(::ledger_rest::ledger_rest_args& args, ::ledger_rest::logger& logger);

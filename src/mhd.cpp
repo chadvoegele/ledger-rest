@@ -35,9 +35,9 @@
 
 #include "mhd.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   mhd::mhd(mhd_args& args, ::ledger_rest::logger& logger,
-      ::budget_charts::responder& responder)
+      ::ledger_rest::responder& responder)
     : logger(logger), responder(responder), port(args.get_port()),
       key(args.get_key()), cert(args.get_cert()),
       client_cert(args.get_client_cert()), user_pass(args.get_user_pass()) {

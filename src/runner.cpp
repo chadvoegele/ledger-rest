@@ -30,7 +30,7 @@
 
 #include "runner.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   void runner::run() {
     sigset_t emptyset;
     sigemptyset(&emptyset);

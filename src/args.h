@@ -34,7 +34,7 @@
 #include "mhd_args.h"
 #include "ledger_rest_args.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   class args : public ::ledger_rest::ledger_rest_args, public mhd_args {
     public:
       args(int argc, char** argv);

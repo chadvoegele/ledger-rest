@@ -30,12 +30,12 @@
 #include "uri_parser.h"
 
 void run_split_test(const std::string& input, const std::list<std::string>& expected) {
-  auto split = budget_charts::split_string(input, std::string("/"));
+  auto split = ledger_rest::split_string(input, std::string("/"));
   ASSERT_TRUE(split == expected);
 }
 
 void run_join_test(const std::list<std::string>& input, const std::string& expected) {
-  auto joined = budget_charts::join_string(input, std::string("/"));
+  auto joined = ledger_rest::join_string(input, std::string("/"));
   ASSERT_TRUE(joined == expected);
 }
 
@@ -63,7 +63,7 @@ TEST(uri_parser, split_string3) {
 void run_mapify_uri_test(std::multimap<std::string, std::string> input,
     std::unordered_map<std::string, std::list<std::string>> expected) {
   std::unordered_map<std::string, std::list<std::string>> actual
-    = budget_charts::mapify_uri_args(input);
+    = ledger_rest::mapify_uri_args(input);
   ASSERT_TRUE(actual == expected);
 }
 

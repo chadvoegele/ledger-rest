@@ -31,7 +31,7 @@
 
 #include "file_reader.h"
 
-namespace budget_charts {
+namespace ledger_rest {
   std::string read_whole_file(std::string path) {
     // Thanks to Tyler McHenry on SO
     std::ifstream t(path);

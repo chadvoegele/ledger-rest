@@ -28,7 +28,7 @@
 
 #include "runner.h"
 
-namespace budget_charts {
-  void set_runner(::budget_charts::runner* r);
+namespace ledger_rest {
+  void set_runner(::ledger_rest::runner* r);
   void stop_runner(int signal);
 }

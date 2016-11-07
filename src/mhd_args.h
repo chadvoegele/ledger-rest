@@ -29,7 +29,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace budget_charts {
+namespace ledger_rest {
   class mhd_args {
     public:
       virtual int get_port() = 0;

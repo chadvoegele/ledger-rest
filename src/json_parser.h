@@ -36,7 +36,7 @@ namespace std {
   using optional = experimental::optional<T>;
 }
 
-namespace budget_charts {
+namespace ledger_rest {
   std::string trim_whitespace(std::string);
   std::optional<std::string> parse_json_string(std::string&);
   std::optional<std::list<std::string>> parse_json_array_of_strings(std::string&);

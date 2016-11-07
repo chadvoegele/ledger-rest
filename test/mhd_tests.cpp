@@ -39,7 +39,7 @@
 
 #include "black_hole_logger.h"
 
-class magnet_responder : public budget_charts::responder {
+class magnet_responder : public ledger_rest::responder {
     public:
       http::response respond(http::request request) {
         this->request = new http::request(request);
@@ -62,7 +62,7 @@ class magnet_responder : public budget_charts::responder {
       http::request* request = NULL;
 };
 
-class predef_mhd_args : public ::budget_charts::mhd_args {
+class predef_mhd_args : public ::ledger_rest::mhd_args {
     public:
       virtual bool get_secure() {
         return false;
@@ -112,10 +112,10 @@ void run_mhd_request_test(std::string url,
   magnet_responder mr;
   predef_mhd_args args;
   black_hole_logger logger;
-  budget_charts::mhd mhd(args, logger, mr);
+  ledger_rest::mhd mhd(args, logger, mr);
 
-  std::list<budget_charts::runnable*> runners{ &mhd };
-  budget_charts::runner runner(logger, runners);
+  std::list<ledger_rest::runnable*> runners{ &mhd };
+  ledger_rest::runner runner(logger, runners);
 
   std::function<void()> run_server_fn = [&]() { runner.run(); };
   std::thread t(run_server_fn);

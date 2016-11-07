@@ -30,7 +30,7 @@
 #include <sstream>
 #include <cstring>
 
-namespace budget_charts {
+namespace ledger_rest {
   std::string trim_whitespace(std::string s) {
     std::stringstream ss;
 

@@ -35,7 +35,7 @@
 const char *argp_program_version = "";
 const char *argp_program_bug_address = "";
 
-namespace budget_charts {
+namespace ledger_rest {
   args::args(int argc, char** argv) {
     struct argp_option options[] = {
       {"level",  'l', "log level",      0,  "Log level [0-9]. Higher numbers mean more logging." },

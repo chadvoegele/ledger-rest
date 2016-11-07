@@ -26,6 +26,6 @@
 
 #pragma once
 
-namespace budget_charts {
+namespace ledger_rest {
   std::string read_whole_file(std::string path);
 }

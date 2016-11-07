@@ -30,7 +30,7 @@
 #include <sstream>
 #include <cstring>
 
-namespace budget_charts {
+namespace ledger_rest {
   std::list<std::string> split_string(std::string str, std::string delimiter) {
     std::list<std::string> split;
 

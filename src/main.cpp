@@ -38,18 +38,18 @@
 #include "signal_handler.h"
 
 int main(int argc, char** argv) {
-  budget_charts::args args(argc, argv);
+  ledger_rest::args args(argc, argv);
 
   ledger_rest::stderr_logger logger(args.get_log_level());
-  budget_charts::ledger_rest_runnable ledger(args, logger);
+  ledger_rest::ledger_rest_runnable ledger(args, logger);
 
-  budget_charts::mhd mhd(args, logger, ledger);
+  ledger_rest::mhd mhd(args, logger, ledger);
 
-  std::list<budget_charts::runnable*> runners{ &mhd, &ledger };
-  budget_charts::runner runner(logger, runners);
+  std::list<ledger_rest::runnable*> runners{ &mhd, &ledger };
+  ledger_rest::runner runner(logger, runners);
 
-  budget_charts::set_runner(&runner);
-  if (std::signal(SIGINT, budget_charts::stop_runner) == SIG_ERR) {
+  ledger_rest::set_runner(&runner);
+  if (std::signal(SIGINT, ledger_rest::stop_runner) == SIG_ERR) {
     logger.log(5, "Error setting signal handler.");
     exit(EXIT_FAILURE);
   }
