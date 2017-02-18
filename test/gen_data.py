@@ -15,7 +15,7 @@ print("  expenses:rent   $1000")
 print("  assets:checking")
 print("")
 
-print("~Monthly from 2010/1/2 to 2020/1/1")
+print("~Monthly from 2010/1/2 to 2066/1/1")
 print("  expenses:rent   $1500")
 print("  assets:checking")
 print("")
@@ -26,7 +26,7 @@ print("  assets:checking")
 print("")
 
 start_date = datetime.date(2000,1,1)
-end_date = datetime.date(2015,7,30)
+end_date = datetime.date(2065,12,31)
 
 dates = [datetime.date(2000,1,1),
         datetime.date(2005,1,1),
@@ -34,10 +34,11 @@ dates = [datetime.date(2000,1,1),
         datetime.date(2009,1,1),
         datetime.date(2011,1,1),
         datetime.date(2013,1,1),
-        datetime.date(2016,1,1)]
-base = [100, 102, 104, 105, 106, 107, 110]
+        datetime.date(2016,1,1),
+        datetime.date(2065,12,31)]
+base = [100, 102, 104, 105, 106, 107, 110, 105]
 
-fn = scipy.interpolate.UnivariateSpline([d.toordinal() for d in dates], base)
+fn = scipy.interpolate.interp1d([d.toordinal() for d in dates], base)
 
 d = start_date
 while (d < end_date):
@@ -61,7 +62,8 @@ dates = [datetime.date(2000,1,1),
         datetime.date(2013,1,1),
         datetime.date(2014,1,1),
         datetime.date(2015,1,1),
-        datetime.date(2016,1,1)]
+        datetime.date(2016,1,1),
+        datetime.date(2065,12,31)]
 base = [2,
         2.5,
         2.5,
@@ -75,9 +77,10 @@ base = [2,
         4,
         3.5,
         3,
-        3.5]
+        3.5,
+        3]
 
-fn = scipy.interpolate.UnivariateSpline([d.toordinal() for d in dates], base)
+fn = scipy.interpolate.interp1d([d.toordinal() for d in dates], base)
 
 d = start_date
 while (d < end_date):
@@ -101,13 +104,15 @@ while (d < end_date):
 dates = [datetime.date(2000,1,1),
         datetime.date(2004,1,1),
         datetime.date(2009,1,1),
-        datetime.date(2016,1,1)]
+        datetime.date(2016,1,1),
+        datetime.date(2065,12,31)]
 base = [2,
         3,
         4,
+        5,
         6]
 
-fn = scipy.interpolate.UnivariateSpline([d.toordinal() for d in dates], base)
+fn = scipy.interpolate.interp1d([d.toordinal() for d in dates], base)
 
 d = start_date
 while (d < end_date):
@@ -131,13 +136,15 @@ while (d < end_date):
 dates = [datetime.date(2000,1,1),
         datetime.date(2004,1,1),
         datetime.date(2009,1,1),
-        datetime.date(2016,1,1)]
+        datetime.date(2016,1,1),
+        datetime.date(2065,12,31)]
 base = [1,
         10,
         15,
+        8,
         6]
 
-fn = scipy.interpolate.UnivariateSpline([d.toordinal() for d in dates], base)
+fn = scipy.interpolate.interp1d([d.toordinal() for d in dates], base)
 
 d = start_date
 while (d < end_date):
@@ -161,11 +168,13 @@ while (d < end_date):
 dates = [datetime.date(2000,1,1),
         datetime.date(2004,1,1),
         datetime.date(2009,1,1),
-        datetime.date(2016,1,1)]
+        datetime.date(2016,1,1),
+        datetime.date(2065,12,31)]
 base = [400,
         500,
         700,
-        1500]
+        1500,
+        800]
 
 fn = scipy.interpolate.interp1d([d.toordinal() for d in dates], base, kind="nearest")
 
