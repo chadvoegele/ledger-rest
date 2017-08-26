@@ -27,6 +27,7 @@
 
 #include <list>
 #include <thread>
+#include <functional>
 #include <gtest/gtest.h>
 #include <curl/curl.h>
 
