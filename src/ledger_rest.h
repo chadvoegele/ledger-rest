@@ -57,7 +57,6 @@ namespace ledger_rest {
       static std::string to_json(std::list<post_result> posts);
 
       std::list<std::string> get_accounts();
-      std::list<std::string> get_budget_accounts();
       static std::string to_json(std::list<std::string> accounts);
 
       static std::string to_json(std::list<std::list<post_result>> results);

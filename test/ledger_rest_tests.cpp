@@ -163,12 +163,6 @@ void run_account_test(const std::string& ledger_file,
       expected);
 }
 
-void run_budget_account_test(const std::string& ledger_file,
-    const std::vector<std::string>& expected) {
-  run_generic_account_test(ledger_file,
-      &ledger_rest::ledger_rest::get_budget_accounts, expected);
-}
-
 TEST(ledger_rest, account) {
   std::vector<std::string> expected = {
     std::string("assets:cash"),
@@ -178,15 +172,6 @@ TEST(ledger_rest, account) {
   };
 
   run_account_test(std::string("/ledger1.txt"), expected);
-}
-
-TEST(ledger_rest, budget_account) {
-  std::vector<std::string> expected = {
-    std::string("assets:cash"),
-    std::string("expenses:fun")
-  };
-
-  run_budget_account_test(std::string("/ledger1.txt"), expected);
 }
 
 TEST(ledger_rest, respond_fail) {

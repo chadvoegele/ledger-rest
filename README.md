@@ -23,11 +23,6 @@ Short|Long                                    |Description                      
   * __Example Reponse__: [ "assets", "expenses:car", "expenses:food", "income" ]
   * __ledger-cli__: `ledger bal --flat --balance-format "%a\n"`
 
-* Budget Accounts
-  * __Request__: GET /ledger_rest/budget_accounts
-  * __Example Reponse__: [ "assets", "expenses:food", "income" ]
-  * __ledger-cli__: `ledger bal --flat --budget --balance-format "%a\n"`
-
 * Register
   * __Request__: GET /ledger_rest/report/register?args=-E&args=--collapse&args=--period&args=monthly&query=expenses
   * __Example Reponse__:
