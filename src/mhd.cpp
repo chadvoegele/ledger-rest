@@ -32,6 +32,7 @@
 #include <iostream>
 #include <termios.h>
 #include <sys/unistd.h>
+#include <arpa/inet.h>
 
 #include "mhd.h"
 
@@ -40,7 +41,8 @@ namespace ledger_rest {
       ::ledger_rest::responder& responder)
     : logger(logger), responder(responder), port(args.get_port()),
       key(args.get_key()), cert(args.get_cert()),
-      client_cert(args.get_client_cert()), user_pass(args.get_user_pass()) {
+      client_cert(args.get_client_cert()), user_pass(args.get_user_pass()),
+      address(args.get_address()) {
     start_daemon(&daemon);
     if (NULL == daemon) {
       throw std::runtime_error("Could not create MHD daemon.");
@@ -79,12 +81,18 @@ namespace ledger_rest {
   }
 
   void mhd::start_daemon(struct MHD_Daemon** d) {
+    struct sockaddr_in sock_address;
+    sock_address.sin_family = AF_INET;
+    sock_address.sin_port = htons(port);
+    inet_pton(AF_INET, address.c_str(), &sock_address.sin_addr);
+
     if (cert.size() == 0 || key.size() == 0) {
       logger.log(5, "HTTP Mode");
       *d = MHD_start_daemon(MHD_NO_FLAG,
-          port, NULL, NULL,
+          0, NULL, NULL,
           &answer_callback_no_auth, this,
           MHD_OPTION_NOTIFY_COMPLETED, &request_completed_callback, NULL,
+          MHD_OPTION_SOCK_ADDR, &sock_address,
           MHD_OPTION_END);
 
     } else if (client_cert.size() == 0) {
@@ -94,8 +102,9 @@ namespace ledger_rest {
 #endif
 
       *d = MHD_start_daemon(MHD_USE_SSL,
-          port, NULL, NULL,
+          0, NULL, NULL,
           &answer_callback_auth, this,
+          MHD_OPTION_SOCK_ADDR, &sock_address,
           MHD_OPTION_HTTPS_MEM_CERT, cert.c_str(),
 #if MHD_VERSION >= 0x00094001
           MHD_OPTION_HTTPS_KEY_PASSWORD, key_pass.c_str(),
@@ -112,8 +121,9 @@ namespace ledger_rest {
 #endif
 
       *d = MHD_start_daemon(MHD_USE_SSL,
-          port, NULL, NULL,
+          0, NULL, NULL,
           &answer_callback_auth, this,
+          MHD_OPTION_SOCK_ADDR, &sock_address,
           MHD_OPTION_HTTPS_MEM_CERT, cert.c_str(),
 #if MHD_VERSION >= 0x00094001
           MHD_OPTION_HTTPS_KEY_PASSWORD, key_pass.c_str(),

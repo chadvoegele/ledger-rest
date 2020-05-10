@@ -42,6 +42,7 @@ namespace ledger_rest {
       {"file",  'f', "ledger file",      0,  "Leger file" },
       {"ledger_rest_prefix",  'e', "ledger rest prefix",      0,  "Prefix for ledger REST http queries. Default is /ledger_rest" },
       {"port",  'p', "port number",      0,  "Port for server to run on." },
+      {"address",  'a', "address to run on",      0,  "Address for server to bind to." },
       {"key",  'k', "private key file",      0,  "File containing private key for HTTPS." },
       {"cert",  'c', "certificate file",      0,  "Certificate used by HTTPS." },
       {"client_cert",  't', "client certificate file", 0, "Certificate used to validate client certs." },
@@ -58,6 +59,7 @@ namespace ledger_rest {
     arguments.ledger_file_path = std::string("");
     arguments.ledger_rest_prefix = std::string("ledger_rest");
     arguments.port = 80;
+    arguments.address = "0.0.0.0";
     arguments.key = std::string("");
     arguments.cert = std::string("");
     arguments.client_cert = std::string("");
@@ -94,6 +96,12 @@ namespace ledger_rest {
           if (port <= 0 || port > 65535)
             throw std::runtime_error("Invalid port number" + std::string(arg));
           arguments->port = port;
+        }
+        break;
+
+      case 'a':
+        {
+          arguments->address = std::string(arg);
         }
         break;
 
@@ -154,6 +162,10 @@ namespace ledger_rest {
 
   int args::get_port() {
     return arguments.port;
+  }
+
+  std::string args::get_address() {
+    return arguments.address;
   }
 
   int args::get_log_level() {

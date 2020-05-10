@@ -54,6 +54,7 @@ namespace ledger_rest {
       unsigned long long get_select_timeout();
 
       const int port;
+      const std::string address;
       const std::string key;
       const std::string cert;
       const std::string client_cert;

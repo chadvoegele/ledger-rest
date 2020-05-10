@@ -33,6 +33,7 @@ namespace ledger_rest {
   class mhd_args {
     public:
       virtual int get_port() = 0;
+      virtual std::string get_address() = 0;
       virtual std::string get_key() = 0;
       virtual std::string get_cert() = 0;
       virtual std::string get_client_cert() = 0;

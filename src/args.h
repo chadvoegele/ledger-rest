@@ -41,6 +41,7 @@ namespace ledger_rest {
       virtual ~args() { }
 
       virtual int get_port();
+      virtual std::string get_address();
       virtual int get_log_level();
       virtual std::string get_ledger_file_path();
       virtual std::string get_ledger_rest_prefix();
@@ -57,6 +58,7 @@ namespace ledger_rest {
       struct arguments {
         int log_level;
         int port;
+        std::string address;
         std::string ledger_file_path;
         std::string ledger_rest_prefix;
         std::string key;

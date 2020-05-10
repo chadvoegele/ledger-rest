@@ -69,6 +69,10 @@ class predef_mhd_args : public ::ledger_rest::mhd_args {
         return false;
       }
 
+      virtual std::string get_address() {
+        return "0.0.0.0";
+      }
+
       virtual int get_port() {
         return 8080;
       }
