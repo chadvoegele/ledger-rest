@@ -12,9 +12,9 @@ RUN \
       git clone https://github.com/ledger/ledger.git && \
       cd ledger && \
       git checkout v3.1.1 && \
-      install -m 644 lib/utfcpp/v2_0/source/utf8.h /usr/include/utf8.h && \
-      install -d /usr/include/utf8 && \
-      find lib/utfcpp/v2_0/source/utf8 -type f -exec install -m 644 -D {} /usr/include/utf8/ \; && \
+      install -d /usr/include/utf8cpp/utf8 && \
+      install -m 644 lib/utfcpp/v2_0/source/utf8.h /usr/include/utf8cpp/utf8.h && \
+      find lib/utfcpp/v2_0/source/utf8 -type f -exec install -m 644 -D {} /usr/include/utf8cpp/utf8/ \; && \
       cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_DEBUG=0 . && \
       make -j$(nproc) install
 WORKDIR /tmp/ledger-rest_build

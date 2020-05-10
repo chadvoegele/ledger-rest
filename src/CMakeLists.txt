@@ -4,7 +4,7 @@ include(../cmake/find_microhttpd.cmake)
 find_library(LEDGER_LIB NAMES "libledger.so" PATHS "/usr/lib")
 find_path(LEDGER_INCLUDE NAMES "ledger/")
 
-find_path(UTF8CPP_INCLUDE NAMES "utf8/")
+find_path(UTF8CPP_INCLUDE NAMES "utf8/" PATHS "/usr/include/utf8cpp")
 
 find_library(GNUTLS_LIB NAMES "libgnutls.so" PATHS "/usr/lib")
 find_path(GNUTLS_INCLUDE NAMES "gnutls/gnutls.h")

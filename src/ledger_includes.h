@@ -53,7 +53,7 @@
 #include <boost/ptr_container/ptr_deque.hpp>
 #include <boost/intrusive_ptr.hpp>
 
-#include <utf8.h>
+#include <utf8cpp/utf8.h>
 
 #define _(str) str
 #define _f(str) boost::format(_(str))
