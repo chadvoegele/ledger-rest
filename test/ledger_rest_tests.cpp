@@ -25,6 +25,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#include <unordered_map>
 #include <gtest/gtest.h>
 
 #include "ledger_rest_args.h"
