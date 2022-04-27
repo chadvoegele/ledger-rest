@@ -255,9 +255,13 @@ namespace ledger_rest {
 
     if (uri_parts == register_request) {
       if (request.method == std::string("GET")) {
-        if (uri_args.find("args") != uri_args.end()
-            && uri_args.find("query") != uri_args.end()) {
-          std::list<std::string> args = uri_args[std::string("args")];
+        if (uri_args.find("query") != uri_args.end()) {
+          std::list<std::string> args;
+          if (uri_args.find("args") != uri_args.end()) {
+            args = uri_args[std::string("args")];
+          } else {
+            args = {};
+          }
           std::list<std::string> query = uri_args[std::string("query")];
           std::list<post_result> reg(ledger_rest::run_register(args, query));
 
@@ -298,6 +302,7 @@ namespace ledger_rest {
       return res;
 
     } else
+      lr_logger.log(5, "Url not found: " + request.url + " for method: " + request.method);
       return build_fail(http::status_code::NOT_FOUND);
   }
 

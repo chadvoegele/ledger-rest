@@ -133,6 +133,18 @@ TEST(ledger_rest, register3) {
   run_register_test(std::string("ledger2.txt"), args, query, expected);
 }
 
+TEST(ledger_rest, register4) {
+  std::list<std::string> args = {};
+  std::list<std::string> query = { "expenses", "and", "payee", "movie" };
+
+  std::vector<post_result> expected = {
+    build_result(10, std::string("2015/5/16"), std::string("expenses:fun")),
+    build_result(20, std::string("2015/7/17"), std::string("expenses:movie"))
+  };
+
+  run_register_test(std::string("ledger1.txt"), args, query, expected);
+}
+
 template<typename T>
 void run_generic_account_test(const std::string& ledger_file,
     T account_function,
