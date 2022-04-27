@@ -136,7 +136,7 @@ namespace ledger_rest {
     }
   };
 
-  int mhd::answer_callback_auth(void *cls,
+  MHD_Result mhd::answer_callback_auth(void *cls,
       struct MHD_Connection* connection,
       const char* url,
       const char* method,
@@ -144,7 +144,7 @@ namespace ledger_rest {
       const char* upload_data,
       size_t* upload_data_size,
       void** con_cls) {
-    int ret;
+    MHD_Result ret;
 
     if (*con_cls == NULL) {
       struct con_info* conn = (struct con_info*)malloc(sizeof(struct con_info));
@@ -194,7 +194,7 @@ namespace ledger_rest {
     return ret;
   }
 
-  int mhd::answer_callback_no_auth(void *cls,
+  MHD_Result mhd::answer_callback_no_auth(void *cls,
       struct MHD_Connection* connection,
       const char* url,
       const char* method,
@@ -228,7 +228,7 @@ namespace ledger_rest {
       const char* page = conn->response->body.c_str();
       struct MHD_Response *mhd_response =
         MHD_create_response_from_buffer(strlen(page), (void*)page, MHD_RESPMEM_MUST_COPY);
-      int ret = MHD_queue_response(connection, conn->response->status_code, mhd_response);
+      MHD_Result ret = MHD_queue_response(connection, conn->response->status_code, mhd_response);
       MHD_destroy_response(mhd_response);
       return ret;
     }
@@ -376,7 +376,7 @@ namespace ledger_rest {
     return values;
   }
 
-  int mhd::key_value_collector(void* cls, enum MHD_ValueKind kind, const char* key, const char* value) {
+  MHD_Result mhd::key_value_collector(void* cls, enum MHD_ValueKind kind, const char* key, const char* value) {
     std::multimap<std::string, std::string>* map
       = static_cast<std::multimap<std::string, std::string>*>(cls);
     if (key != NULL && value != NULL)

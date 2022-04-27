@@ -65,7 +65,7 @@ namespace ledger_rest {
       ledger_rest::responder& responder;
       struct MHD_Daemon* daemon;
 
-      static int answer_callback_auth(void *cls,
+      static MHD_Result answer_callback_auth(void *cls,
           struct MHD_Connection* connection,
           const char* url,
           const char* method,
@@ -74,7 +74,7 @@ namespace ledger_rest {
           size_t* upload_data_size,
           void** con_cls);
 
-      static int answer_callback_no_auth(void *cls,
+      static MHD_Result answer_callback_no_auth(void *cls,
           struct MHD_Connection* connection,
           const char* url,
           const char* method,
@@ -100,7 +100,7 @@ namespace ledger_rest {
 
       static std::multimap<std::string, std::string> get_values(
           struct MHD_Connection* connection, enum MHD_ValueKind kind);
-      static int key_value_collector(void* cls, enum MHD_ValueKind kind, const char* key,
+      static MHD_Result key_value_collector(void* cls, enum MHD_ValueKind kind, const char* key,
           const char* value);
       template<typename K, typename T>
         static std::map<K, T> convert_map(std::multimap<K, T> mmap);
