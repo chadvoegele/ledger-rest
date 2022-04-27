@@ -52,6 +52,7 @@
 #include <boost/regex/icu.hpp>
 #include <boost/ptr_container/ptr_deque.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/bind.hpp>
 
 #include <utf8cpp/utf8.h>
 
