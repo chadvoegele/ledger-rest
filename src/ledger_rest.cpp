@@ -110,8 +110,14 @@ namespace ledger_rest {
     ss << "\"amount\" : ";
     ss << posts.amount;
     ss << ", ";
+    ss << "\"total\" : ";
+    ss << posts.total;
+    ss << ", ";
     ss << "\"date\" : ";
     ss << "\"" << boost::gregorian::to_iso_extended_string(posts.date) << "\"";
+    ss << ", ";
+    ss << "\"payee\" : ";
+    ss << "\"" << posts.payee << "\"";
     ss << ", ";
     ss << "\"account_name\" : ";
     ss << "\"" << posts.account_name << "\"";
@@ -355,6 +361,19 @@ namespace ledger_rest {
     return include_files;
   }
 
+  ledger::value_t ledger_rest::post_capturer::get_total(ledger::post_t& post)
+  {
+    if (post.has_xdata() && !post.xdata().total.is_null()) {
+      return post.xdata().total;
+
+    } else if (post.amount.is_null()) {
+      return 0L;
+
+    } else {
+      return post.amount;
+    }
+  }
+
   ledger::value_t ledger_rest::post_capturer::get_amount(ledger::post_t& post)
   {
     if (post.has_xdata() && post.xdata().has_flags(POST_EXT_COMPOUND)) {
@@ -378,9 +397,11 @@ namespace ledger_rest {
   void ledger_rest::post_capturer::operator()(ledger::post_t& post) {
     post_result r;
     r.amount = get_amount(post).to_amount().to_double();
+    r.total = get_total(post).value().to_amount().to_double();
     r.date = post.xact->date();
     ledger::account_t& account(*post.reported_account());
     r.account_name = account.fullname();
+    r.payee = post.payee();
     result_capture.push_back(r);
   }
 

@@ -47,8 +47,10 @@ namespace ledger_rest {
 
       struct post_result {
         double amount = 0;
+        double total = 0;
         boost::gregorian::date date;
         std::string account_name;
+        std::string payee;
       };
 
       std::list<post_result> run_register(std::list<std::string> args,
@@ -91,6 +93,7 @@ namespace ledger_rest {
           virtual ~post_capturer() { }
           virtual void flush( ) { }
           ledger::value_t get_amount(ledger::post_t& post);
+          ledger::value_t get_total(ledger::post_t& post);
           virtual void operator()(ledger::post_t& post);
           virtual void clear();
           std::list<post_result> get_post_results();

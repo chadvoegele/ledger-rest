@@ -52,12 +52,14 @@ class simple_args : public ledger_rest::ledger_rest_args {
     std::string path;
 };
 
-post_result build_result( double amount, std::string date_str,
-    std::string account_name) {
+post_result build_result(std::string date_str, std::string payee, std::string account_name,
+    double amount, double total) {
   post_result r;
-  r.amount = amount;
   r.date = boost::gregorian::from_string(date_str);
+  r.payee = payee;
   r.account_name = account_name;
+  r.amount = amount;
+  r.total = total;
   return r;
 }
 
@@ -96,10 +98,10 @@ TEST(ledger_rest, register1) {
   std::list<std::string> query = { "expenses" };
 
   std::vector<post_result> expected = {
-    build_result(-110, std::string("2015/5/01"), std::string("<Total>")),
-    build_result(-110, std::string("2015/6/01"), std::string("expenses:fun")),
-    build_result(-110, std::string("2015/7/01"), std::string("<Total>")),
-    build_result(-200, std::string("2015/8/01"), std::string("expenses:fun"))
+    build_result("2015/5/01", " - 15-May-31", "<Total>", -110, -110),
+    build_result("2015/6/01", " - 15-Jun-30", "expenses:fun", -110, -220),
+    build_result("2015/7/01", " - 15-Jul-31", "<Total>", -110, -330),
+    build_result("2015/8/01", " - 15-Aug-31", "expenses:fun", -200, -530)
   };
 
   run_register_test(std::string("ledger1.txt"), args, query, expected);
@@ -111,9 +113,9 @@ TEST(ledger_rest, register2) {
   std::list<std::string> query = { "expenses", "and", "payee", "movie" };
 
   std::vector<post_result> expected = {
-    build_result(10, std::string("2015/5/01"), std::string("expenses:fun")),
-    build_result(0, std::string("2015/6/01"), std::string("<None>")),
-    build_result(20, std::string("2015/7/01"), std::string("expenses:movie"))
+    build_result("2015/5/01", " - 15-May-31", "expenses:fun", 10, 10),
+    build_result("2015/6/01", " - 15-Jun-30", "<None>", 0, 10),
+    build_result("2015/7/01", " - 15-Jul-31", "expenses:movie", 20, 30)
   };
 
   run_register_test(std::string("ledger1.txt"), args, query, expected);
@@ -125,9 +127,9 @@ TEST(ledger_rest, register3) {
   std::list<std::string> query = { "assets" };
 
   std::vector<post_result> expected = {
-    build_result(30, std::string("2015/5/01"), std::string("assets")),
-    build_result(-10, std::string("2015/6/01"), std::string("assets:cash")),
-    build_result(-15, std::string("2015/7/01"), std::string("assets:cash"))
+    build_result("2015/5/01", " - 15-May-31", "assets", 30, 30),
+    build_result("2015/6/01", " - 15-Jun-30", "assets:cash", -10, 20),
+    build_result("2015/7/01", " - 15-Jul-31", "assets:cash", -15, 5)
   };
 
   run_register_test(std::string("ledger2.txt"), args, query, expected);
@@ -138,8 +140,8 @@ TEST(ledger_rest, register4) {
   std::list<std::string> query = { "expenses", "and", "payee", "movie" };
 
   std::vector<post_result> expected = {
-    build_result(10, std::string("2015/5/16"), std::string("expenses:fun")),
-    build_result(20, std::string("2015/7/17"), std::string("expenses:movie"))
+    build_result("2015/5/16", "movie", "expenses:fun", 10, 10),
+    build_result("2015/7/17", "movie", "expenses:movie", 20, 30)
   };
 
   run_register_test(std::string("ledger1.txt"), args, query, expected);
@@ -213,19 +215,19 @@ TEST(ledger_rest, respond_fail) {
 }
 
 TEST(ledger_rest, post_to_json) {
-  post_result pr(build_result(100.534, std::string("2010/07/01"), std::string("assets")));
+  post_result pr(build_result("2010/07/01", "paycheck", "assets", 100.534, 200.534));
   std::string json(ledger_rest::ledger_rest::to_json(pr));
-  std::string expected("{\"amount\" : 100.53, \"date\" : \"2010-07-01\", \"account_name\" : \"assets\"}");
+  std::string expected("{\"amount\" : 100.53, \"total\" : 200.53, \"date\" : \"2010-07-01\", \"payee\" : \"paycheck\", \"account_name\" : \"assets\"}");
   ASSERT_EQ(expected, json);
 }
 
 TEST(ledger_rest, posts_to_json) {
-  post_result pr1(build_result(100.534, std::string("2010/07/01"), std::string("assets")));
-  post_result pr2(build_result(-10.5, std::string("2009/07/01"), std::string("liabilities")));
+  post_result pr1(build_result("2010/07/01", "paycheck", "assets", 100.534, 100.534));
+  post_result pr2(build_result("2009/07/01", "shop", "liabilities", -10.5, 90.534));
   std::list<post_result> prs = { pr1, pr2 };
   std::string json(ledger_rest::ledger_rest::to_json(prs));
-  std::string expected("[{\"amount\" : 100.53, \"date\" : \"2010-07-01\", \"account_name\" : \"assets\"}, "
-      "{\"amount\" : -10.50, \"date\" : \"2009-07-01\", \"account_name\" : \"liabilities\"}]");
+  std::string expected("[{\"amount\" : 100.53, \"total\" : 100.53, \"date\" : \"2010-07-01\", \"payee\" : \"paycheck\", \"account_name\" : \"assets\"}, "
+      "{\"amount\" : -10.50, \"total\" : 90.53, \"date\" : \"2009-07-01\", \"payee\" : \"shop\", \"account_name\" : \"liabilities\"}]");
   ASSERT_EQ(expected, json);
 }
 
